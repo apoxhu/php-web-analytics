@@ -411,14 +411,14 @@ ksort($last_visitors_by_daytime);
             data.addColumn('number', 'Visitors');
             data.addRows([
                 <?php
-                $i = 0;
+                $f = true;
                 foreach ($top_origins as $key => $value) {
-                    if($i == 0) {
-                        echo "['".$key."', ".$value.", ".$top_originsvo[$key]."]";
-                        $i++;
+                    if($f) {
+                        $f = false;
                     } else {
-                        echo ",['".$key."', ".$value.", ".$top_originsvo[$key]."]";
+                        echo ",";
                     }
+                    echo "['".$key."', ".$value.", ".(is_numeric($top_originsvo[$key])?$top_originsvo[$key]:0)."]";
                 }
                 ?>
             ]);
@@ -561,11 +561,11 @@ ksort($last_visitors_by_daytime);
                 $i = 0;
                 foreach ($top_uris as $key => $value) {
                     if($i == 0) {
-                        echo "['".$key."', ".$value."]";
                         $i++;
                     } else {
-                        echo ",['".$key."', ".$value."]";
+                        echo ",";
                     }
+                    echo "['".$key."', ".$value."]";
                 }
                 ?>
             ]);

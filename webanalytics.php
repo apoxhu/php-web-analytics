@@ -215,6 +215,31 @@ class web_analytics {
     // ISP
     private $isp = null;
 
+    // Get host by addr and cache it in session
+    function get_host_by_addr($ip) {
+        // Start the session if it's not already started
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        // Ensure there's a dedicated session variable for cached hostnames
+        if (!isset($_SESSION['host_cache'])) {
+            $_SESSION['host_cache'] = array();
+        }
+
+        // Check if the IP has already been resolved in this session
+        if (isset($_SESSION['host_cache'][$ip])) {
+            return $_SESSION['host_cache'][$ip];
+        }
+
+        $host = gethostbyaddr($ip);
+
+        // Cache the resolved hostname in the session
+        $_SESSION['host_cache'][$ip] = $host;
+
+        return $host;
+    }
+
     // Use hostname to determine origin country
     function get_country_by_host($host) {
         // Make sure host is set and not an ip address
@@ -242,10 +267,10 @@ class web_analytics {
         // Check if ip address is valid
         if (filter_var($ip, FILTER_VALIDATE_IP)) {
             // Get host
-            $host = gethostbyaddr($ip);
+            $host = $this->get_host_by_addr($ip);
 
             // Try determination of origin via hostname
-            $country = $this->get_country_by_host(gethostbyaddr($ip));
+            $country = $this->get_country_by_host($host);
 
             // If determination via hostname fails and ip is not localhost check RDAP record of ip address
             if($country == null && $ip != "127.0.0.1" && $ip != "::1") {
@@ -440,7 +465,7 @@ class web_analytics {
             return null;
         }
         if (filter_var($ip, FILTER_VALIDATE_IP)) {
-            $host = gethostbyaddr($ip);
+            $host = $this->get_host_by_addr($ip);
         }
         $this->isp = $this->get_isp($host);
         $this->u_country_code = $this->get_country_code($ip);
